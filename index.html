@@ -11,45 +11,62 @@
     <script>
       var ac = new AudioContext;
       var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
-      function makeNode(soundEl) {
+      function makeNode(soundEl, destination) {
         var gain = ac.createGain();
-        var oscillator = ac.createOscillator();
-        oscillator.type = 'square';
-        oscillator.frequency = soundEl.getAttribute('hz');
-        oscillator.connect(gain);
-        gain.connect(ac.destination);
-        for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
-          switch (childEl.nodeName) {
-            case 'lfo':
-              var lfo = ac.createOscillator();
-              var lfoGain = ac.createGain();
-              lfo.frequency = childEl.getAttribute('hz');
-              var min = +childEl.getAttribute('min');
-              var max = +childEl.getAttribute('max');
-              lfoGain.gain.value = (max - min)/2;
-              switch (childEl.getAttribute('on')) {
-                case 'volume':
-                  gain.gain.value = (min + max)/2;
-                  lfoGain.connect(gain.gain);
+        gain.connect(destination);
+        switch (soundEl.nodeName) {
+          case 'sound':
+            gain.nodes = [];
+            for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
+              gain.nodes.push(makeNode(childEl, gain));
+            }
+            function delegate(e) {
+              this.nodes.forEach(function(node) {
+                node.dispatchEvent(e);
+              });
+            }
+            gain.addEventListener('tin-start', delegate);
+            gain.addEventListener('tin-stop', delegate);
+            return gain;
+          case 'square':
+            var oscillator = ac.createOscillator();
+            oscillator.type = 'square';
+            oscillator.frequency = soundEl.getAttribute('hz');
+            oscillator.connect(gain);
+            gain.connect(ac.destination);
+            for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
+              switch (childEl.nodeName) {
+                case 'lfo':
+                  var lfo = ac.createOscillator();
+                  var lfoGain = ac.createGain();
+                  lfo.frequency = childEl.getAttribute('hz');
+                  var min = +childEl.getAttribute('min');
+                  var max = +childEl.getAttribute('max');
+                  lfoGain.gain.value = (max - min)/2;
+                  switch (childEl.getAttribute('on')) {
+                    case 'volume':
+                      gain.gain.value = (min + max)/2;
+                      lfoGain.connect(gain.gain);
+                      break;
+                    default:
+                      console.warn('unknown lfo: ' + childEl.getAttribute('on'));
+                      break;
+                  }
                   break;
                 default:
-                  console.warn('unknown lfo: ' + childEl.getAttribute('on'));
+                  console.warn('unexpected element: ' + childEl.nodeName);
                   break;
               }
-              break;
-            default:
-              console.warn('unexpected element: ' + childEl.nodeName);
-              break;
-          }
+            }
+            gain.addEventListener('tin-start', function() { oscillator.start(); });
+            gain.addEventListener('tin-stop', function() { oscillator.stop(); });
+            return gain;
         }
-        gain.addEventListener('tin-start', function() { oscillator.start(); });
-        gain.addEventListener('tin-stop', function() { oscillator.stop(); });
-        return gain;
       }
       window.onkeydown = function onkeydown(e) {
         if (e.repeat) return;
         var key = e.which;
-        var node = makeNode(doc.documentElement);
+        var node = makeNode(doc.documentElement, ac.destination);
         node.dispatchEvent(new Event('tin-start'));
         function onblur(e) {
           node.dispatchEvent(new Event('tin-stop'));
