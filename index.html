@@ -31,14 +31,14 @@
           case 'square':
             var oscillator = ac.createOscillator();
             oscillator.type = 'square';
-            oscillator.frequency = soundEl.getAttribute('hz');
+            oscillator.frequency.value = soundEl.getAttribute('hz');
             oscillator.connect(gain);
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
               switch (childEl.nodeName) {
                 case 'lfo':
                   var lfo = ac.createOscillator();
                   var lfoGain = ac.createGain();
-                  lfo.frequency = childEl.getAttribute('hz');
+                  lfo.frequency.value = childEl.getAttribute('hz');
                   lfo.connect(lfoGain);
                   lfo.start();
                   var min = +childEl.getAttribute('min');
