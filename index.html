@@ -5,7 +5,11 @@
       <sound release='100ms'>
         <square freq='440hz'>
           <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
-          <lfo on='detune' min='-100' max='100' freq='10hz' />
+          <lfo on='detune' min='-50' max='50' freq='5hz' />
+        </square>
+        <square freq='440hz' volume='10%'>
+          <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
+          <lfo on='detune' min='-10' max='10' freq='8hz' />
         </square>
       </sound>
     </script>
@@ -28,6 +32,7 @@
       function makeNode(soundEl, destination) {
         var gain = ac.createGain();
         gain.connect(destination);
+        gain.gain.value = parseVolumeGain(soundEl.getAttribute('volume') || '100%');
         switch (soundEl.nodeName) {
           case 'sound':
             gain.nodes = [];
