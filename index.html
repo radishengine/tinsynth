@@ -49,16 +49,18 @@
                   var lfoGain = ac.createGain();
                   lfo.frequency.value = parseFreqHz(childEl.getAttribute('freq'));
                   lfo.connect(lfoGain);
-                  lfo.start();
-                  var min = parseVolumeGain(childEl.getAttribute('min'));
-                  var max = parseVolumeGain(childEl.getAttribute('max'));
-                  lfoGain.gain.value = (max - min)/2;
                   switch (childEl.getAttribute('on')) {
                     case 'volume':
+                      var min = parseVolumeGain(childEl.getAttribute('min'));
+                      var max = parseVolumeGain(childEl.getAttribute('max'));
+                      lfoGain.gain.value = (max - min)/2;
                       gain.gain.value = (min + max)/2;
                       lfoGain.connect(gain.gain);
                       break;
                     case 'freq':
+                      var min = parseFreqHz(childEl.getAttribute('min'));
+                      var max = parseFreqHz(childEl.getAttribute('max'));
+                      lfoGain.gain.value = (max - min)/2;
                       oscillator.frequency.value = (min + max)/2;
                       lfoGain.connect(oscillator.frequency);
                       break;
