@@ -10,7 +10,6 @@
     </script>
     <script>
       var ac = new AudioContext;
-      var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
       function makeNode(soundEl, destination) {
         var gain = ac.createGain();
         gain.connect(destination);
@@ -67,6 +66,7 @@
       window.onkeydown = function onkeydown(e) {
         if (e.repeat) return;
         var key = e.which;
+        var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
         var node = makeNode(doc.documentElement, ac.destination);
         node.dispatchEvent(new Event('tin-start'));
         function onblur(e) {
