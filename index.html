@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type='application/xml' id='data'>
+      <sound>
+        <square hz='440'/>
+      </sound>
+    </script>
+    <script>
+      var ac = new AudioContext;
+      var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
+      var soundEl = doc.documentElement;
+      window.onkeydown = function onkeydown(e) {
+        var key = e.which;
+        var oscillator = ac.createOscillator();
+        oscillator.type = 'square';
+        oscillator.frequency = soundEl.getAttribute('hz');
+        oscillator.connect(ac.destination);
+        oscillator.start();
+        window.addEventListener('keyup', function onkeyup(e) {
+          if (e.which === key) {
+            oscillator.stop();
+            this.removeEventListener('keyup', onkeyup);
+          }
+        });
+      };
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
