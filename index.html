@@ -49,6 +49,7 @@
                   var lfoGain = ac.createGain();
                   lfo.frequency.value = parseFreqHz(childEl.getAttribute('freq'));
                   lfo.connect(lfoGain);
+                  lfo.start();
                   switch (childEl.getAttribute('on')) {
                     case 'volume':
                       var min = parseVolumeGain(childEl.getAttribute('min'));
