@@ -39,6 +39,7 @@
                   var lfo = ac.createOscillator();
                   var lfoGain = ac.createGain();
                   lfo.frequency = childEl.getAttribute('hz');
+                  lfo.start();
                   var min = +childEl.getAttribute('min');
                   var max = +childEl.getAttribute('max');
                   lfoGain.gain.value = (max - min)/2;
