@@ -34,7 +34,7 @@
             gain.gain.value = 0;
             var attack = parseTimeSeconds(soundEl.getAttribute('attack') || '10ms');
             var decay = parseTimeSeconds(soundEl.getAttribute('decay') || '10ms');
-            var sustain = parseVolumeGain(soundEl.getAttribute('spike') || '100%');
+            var sustain = parseVolumeGain(soundEl.getAttribute('sustain') || '100%');
             gain.gain.linearRampToValueAtTime(1, ac.currentTime + attack);
             if (sustain !== 1) {
               gain.gain.linearRampToValueAtTime(sustain, ac.currentTime + attack + decay);
