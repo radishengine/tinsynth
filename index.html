@@ -35,9 +35,9 @@
             var attack = parseTimeSeconds(soundEl.getAttribute('attack') || '10ms');
             var decay = parseTimeSeconds(soundEl.getAttribute('decay') || '10ms');
             var spike = parseVolumeGain(soundEl.getAttribute('spike') || '100%');
-            gain.gain.linearRampToValueAtTime(spike, attack);
+            gain.gain.linearRampToValueAtTime(spike, ac.currentTime + attack);
             if (spike !== 1) {
-              gain.gain.linearRampToValueAtTime(1, attack + decay);
+              gain.gain.linearRampToValueAtTime(1, ac.currentTime + attack + decay);
             }
             gain.nodes = [];
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
