@@ -3,13 +3,22 @@
   <head>
     <script type='application/xml' id='data'>
       <sound>
-        <square hz='440'>
-          <lfo on='volume' min='0.75' max='1' hz='20' />
+        <square freq='440hz'>
+          <lfo on='volume' min='75%' max='100%' freq='20hz' />
         </square>
       </sound>
     </script>
     <script>
       var ac = new AudioContext;
+      function parseFreqHz(freq) {
+        if (/khz$/i.test(freq)) return freq.slice(0, -3) * 1000;
+        if (/hz$/i.test(freq)) return +freq.slice(0, -2);
+        return NaN;
+      }
+      function parseVolumeGain(volume) {
+        if (/%$/.test(volume)) return volume.slice(0, -1) * 100;
+        return NaN;
+      }
       function makeNode(soundEl, destination) {
         var gain = ac.createGain();
         gain.connect(destination);
@@ -30,18 +39,18 @@
           case 'square':
             var oscillator = ac.createOscillator();
             oscillator.type = 'square';
-            oscillator.frequency.value = soundEl.getAttribute('hz');
+            oscillator.frequency.value = parseFreqHz(soundEl.getAttribute('freq'));
             oscillator.connect(gain);
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
               switch (childEl.nodeName) {
                 case 'lfo':
                   var lfo = ac.createOscillator();
                   var lfoGain = ac.createGain();
-                  lfo.frequency.value = childEl.getAttribute('hz');
+                  lfo.frequency.value = parseFreqHz(childEl.getAttribute('freq'));
                   lfo.connect(lfoGain);
                   lfo.start();
-                  var min = +childEl.getAttribute('min');
-                  var max = +childEl.getAttribute('max');
+                  var min = parseVolumeGain(childEl.getAttribute('min'));
+                  var max = parseVolumeGain(childEl.getAttribute('max'));
                   lfoGain.gain.value = (max - min)/2;
                   switch (childEl.getAttribute('on')) {
                     case 'volume':
