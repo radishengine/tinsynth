@@ -4,7 +4,8 @@
     <script type='application/xml' id='data'>
       <sound>
         <square freq='440hz'>
-          <lfo on='volume' min='75%' max='100%' freq='20hz' />
+          <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
+          <lfo on='freq' min='400hz' max='500hz' freq='10hz' />
         </square>
       </sound>
     </script>
@@ -56,6 +57,10 @@
                     case 'volume':
                       gain.gain.value = (min + max)/2;
                       lfoGain.connect(gain.gain);
+                      break;
+                    case 'freq':
+                      oscillator.frequency.value = (min + max)/2;
+                      lfoGain.connect(oscillator.frequency);
                       break;
                     default:
                       console.warn('unknown lfo: ' + childEl.getAttribute('on'));
