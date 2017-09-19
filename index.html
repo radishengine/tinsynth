@@ -21,7 +21,7 @@
         return NaN;
       }
       function parseVolumeGain(volume) {
-        if (/%$/.test(volume)) return volume.slice(0, -1) * 100;
+        if (/%$/.test(volume)) return volume.slice(0, -1) / 100;
         return NaN;
       }
       function parseTimeSeconds(time) {
