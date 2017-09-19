@@ -21,7 +21,7 @@
         return NaN;
       }
       function parseTimeSeconds(time) {
-        if (/ms$/i.test(time)) return time.slice(0, -2) * 1000;
+        if (/ms$/i.test(time)) return time.slice(0, -2) / 1000;
         if (/s$/i.test(time)) return time.slice(0, -1);
         return NaN;
       }
