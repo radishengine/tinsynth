@@ -9,17 +9,20 @@
     <script>
       var ac = new AudioContext;
       var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
-      var soundEl = doc.documentElement;
-      window.onkeydown = function onkeydown(e) {
-        var key = e.which;
+      function makeNode(soundEl) {
         var oscillator = ac.createOscillator();
         oscillator.type = 'square';
         oscillator.frequency = soundEl.getAttribute('hz');
-        oscillator.connect(ac.destination);
-        oscillator.start();
+        return oscillator;
+      }
+      window.onkeydown = function onkeydown(e) {
+        var key = e.which;
+        var node = makeNode(doc.documentElement);
+        node.start();
+        node.connect(ac.destination);
         window.addEventListener('keyup', function onkeyup(e) {
           if (e.which === key) {
-            oscillator.stop();
+            node.stop();
             this.removeEventListener('keyup', onkeyup);
           }
         });
