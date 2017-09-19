@@ -42,8 +42,8 @@
               break;
           }
         }
-        gain.addEventListener('tin-start', oscillator.start.bind(oscillator));
-        gain.addEventListener('tin-stop', oscillator.stop.bind(oscillator));
+        gain.addEventListener('tin-start', function() { oscillator.start(); });
+        gain.addEventListener('tin-stop', function() { oscillator.stop(); });
         return gain;
       }
       window.onkeydown = function onkeydown(e) {
