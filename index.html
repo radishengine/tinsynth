@@ -22,11 +22,11 @@
             }
             function delegate(e) {
               this.nodes.forEach(function(node) {
-                node.dispatchEvent(e);
+                node.dispatchEvent(new Event(e.type));
               });
             }
-            gain.addEventListener('tin-start', delegate);
-            gain.addEventListener('tin-stop', delegate);
+            destination.addEventListener('tin-start', delegate);
+            destination.addEventListener('tin-stop', delegate);
             return gain;
           case 'square':
             var oscillator = ac.createOscillator();
