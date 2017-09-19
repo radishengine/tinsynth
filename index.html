@@ -2,16 +2,12 @@
 <html>
   <head>
     <script type='application/xml' id='data'>
-      <sound release='100ms'>
+      <envelope attack='50ms' spike='110%' decay='25ms' release='100ms'>
         <square freq='440hz'>
           <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
           <lfo on='detune' min='-50' max='50' freq='5hz' />
         </square>
-        <square freq='400hz' volume='10%'>
-          <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
-          <lfo on='detune' min='-10' max='10' freq='8hz' />
-        </square>
-      </sound>
+      </envelope>
     </script>
     <script>
       var ac = new AudioContext;
@@ -34,7 +30,15 @@
         gain.connect(destination);
         gain.gain.value = parseVolumeGain(soundEl.getAttribute('volume') || '100%');
         switch (soundEl.nodeName) {
-          case 'sound':
+          case 'envelope':
+            gain.gain.value = 0;
+            var attack = parseTimeSeconds(soundEl.getAttribute('attack') || '10ms');
+            var decay = parseTimeSeconds(soundEl.getAttribute('decay') || '10ms');
+            var spike = parseVolumeGain(soundEl.getAttribute('spike') || '100%');
+            gain.gain.linearRampToValueAtTime(spike, attack);
+            if (spike !== 1) {
+              gain.gain.linearRampToValueAtTime(1, attack + decay);
+            }
             gain.nodes = [];
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
               gain.nodes.push(makeNode(childEl, gain));
