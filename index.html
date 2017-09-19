@@ -2,7 +2,7 @@
 <html>
   <head>
     <script type='application/xml' id='data'>
-      <envelope attack='50ms' spike='110%' decay='25ms' release='100ms'>
+      <envelope attack='50ms' decay='25ms' sustain='50%' release='100ms'>
         <square freq='440hz'>
           <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
           <lfo on='detune' min='-50' max='50' freq='5hz' />
@@ -34,10 +34,10 @@
             gain.gain.value = 0;
             var attack = parseTimeSeconds(soundEl.getAttribute('attack') || '10ms');
             var decay = parseTimeSeconds(soundEl.getAttribute('decay') || '10ms');
-            var spike = parseVolumeGain(soundEl.getAttribute('spike') || '100%');
-            gain.gain.linearRampToValueAtTime(spike, ac.currentTime + attack);
-            if (spike !== 1) {
-              gain.gain.linearRampToValueAtTime(1, ac.currentTime + attack + decay);
+            var sustain = parseVolumeGain(soundEl.getAttribute('spike') || '100%');
+            gain.gain.linearRampToValueAtTime(1, ac.currentTime + attack);
+            if (sustain !== 1) {
+              gain.gain.linearRampToValueAtTime(sustain, ac.currentTime + attack + decay);
             }
             gain.nodes = [];
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
