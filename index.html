@@ -2,7 +2,7 @@
 <html>
   <head>
     <script type='application/xml' id='data'>
-      <sound>
+      <sound release='100ms'>
         <square freq='440hz'>
           <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
           <lfo on='detune' min='-100' max='100' freq='10hz' />
@@ -20,6 +20,11 @@
         if (/%$/.test(volume)) return volume.slice(0, -1) * 100;
         return NaN;
       }
+      function parseTimeSeconds(time) {
+        if (/ms$/i.test(time)) return time.slice(0, -2) * 1000;
+        if (/s$/i.test(time)) return time.slice(0, -1);
+        return NaN;
+      }
       function makeNode(soundEl, destination) {
         var gain = ac.createGain();
         gain.connect(destination);
@@ -29,13 +34,15 @@
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
               gain.nodes.push(makeNode(childEl, gain));
             }
-            function delegate(e) {
+            gain.addEventListener('tin-start', function delegate(e) {
               this.nodes.forEach(function(node) {
                 node.dispatchEvent(new Event(e.type));
               });
-            }
-            gain.addEventListener('tin-start', delegate);
-            gain.addEventListener('tin-stop', delegate);
+            });
+            var release = parseTimeSeconds(soundEl.getAttribute('release') || 0.1);
+            gain.addEventListener('tin-stop', function delegate(e) {
+              this.gain.linearRampToValueAtTime(0, ac.currentTime + release);
+            });
             return gain;
           case 'square':
             var oscillator = ac.createOscillator();
