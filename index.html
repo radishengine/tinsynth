@@ -3,29 +3,64 @@
   <head>
     <script type='application/xml' id='data'>
       <sound>
-        <square hz='440'/>
+        <square hz='440'>
+          <lfo on='volume' min='0.5' max='1' hz='5' />
+        </square>
       </sound>
     </script>
     <script>
       var ac = new AudioContext;
       var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
       function makeNode(soundEl) {
+        var gain = ac.createGain();
         var oscillator = ac.createOscillator();
         oscillator.type = 'square';
         oscillator.frequency = soundEl.getAttribute('hz');
-        return oscillator;
+        oscillator.connect(gain);
+        gain.connect(ac.destination);
+        for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
+          switch (childEl.nodeName) {
+            case 'lfo':
+              var lfo = ac.createOscillator();
+              var lfoGain = ac.createGain();
+              lfo.frequency = childEl.getAttribute('hz');
+              var min = +childEl.getAttribute('min');
+              var max = +childEl.getAttribute('max');
+              lfoGain.gain.value = (max - min)/2;
+              switch (childEl.getAttribute('on')) {
+                case 'volume':
+                  gain.gain.value = (min + max)/2;
+                  lfoGain.connect(gain.gain);
+                  break;
+                default:
+                  console.warn('unknown lfo: ' + childEl.getAttribute('on'));
+                  break;
+              }
+              break;
+            default:
+              console.warn('unexpected element: ' + childEl.nodeName);
+              break;
+          }
+        }
+        gain.addEventListener('tin-start', oscillator.start.bind(oscillator));
+        gain.addEventListener('tin-stop', oscillator.stop.bind(oscillator));
+        return gain;
       }
       window.onkeydown = function onkeydown(e) {
+        if (e.repeat) return;
         var key = e.which;
         var node = makeNode(doc.documentElement);
-        node.start();
-        node.connect(ac.destination);
-        window.addEventListener('keyup', function onkeyup(e) {
-          if (e.which === key) {
-            node.stop();
-            this.removeEventListener('keyup', onkeyup);
-          }
-        });
+        node.dispatchEvent(new Event('tin-start'));
+        function onblur(e) {
+          node.dispatchEvent(new Event('tin-stop'));
+          window.removeEventListener('keyup', onkeyup);
+          window.removeEventListener('blur', onblur);
+        }
+        function onkeyup(e) {
+          if (e.which === key) onblur(e);
+        }
+        window.addEventListener('keyup', onkeyup);
+        window.addEventListener('blur', onblur);
       };
     </script>
   </head>
