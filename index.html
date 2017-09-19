@@ -33,7 +33,6 @@
             oscillator.type = 'square';
             oscillator.frequency = soundEl.getAttribute('hz');
             oscillator.connect(gain);
-            gain.connect(ac.destination);
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
               switch (childEl.nodeName) {
                 case 'lfo':
