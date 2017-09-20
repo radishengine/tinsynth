@@ -3,14 +3,17 @@
   <head>
     <script type='application/xml' id='data'>
       <envelope attack='50ms' decay='25ms' sustain='50%' release='100ms'>
+        <noise mode='pink'/>
+        <!--
         <square freq='440hz'>
-          <!-- <lfo on='volume' min='75%' max='100%' freq='20hz' /> -->
           <lfo on='detune' min='-50' max='50' freq='5hz' />
         </square>
+        -->
       </envelope>
     </script>
     <script>
       var ac = new AudioContext;
+      ac.target = ac.destination;
       ac.convolver = ac.createConvolver();
       ac.convolver.connect(ac.destination);
       function parseFreqHz(freq) {
@@ -54,6 +57,35 @@
             gain.addEventListener('tin-stop', function delegate(e) {
               this.gain.linearRampToValueAtTime(0, ac.currentTime + release);
             });
+            return gain;
+          case 'noise':
+            var mode = soundEl.getAttribute('mode') || 'pink';
+            switch (mode) {
+              default:
+                console.warn('unknown noise mode: ' + mode);
+                break;
+              case 'pink':
+                var bufferSize = 4096;
+                var b0, b1, b2, b3, b4, b5, b6;
+                b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0;
+                var node = ac.createScriptProcessor(bufferSize, 1, 1);
+                node.onaudioprocess = function(e) {
+                  var output = e.outputBuffer.getChannelData(0);
+                  for (var i = 0; i < bufferSize; i++) {
+                    var white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    output[i] *= 0.11; // (roughly) compensate for gain
+                    b6 = white * 0.115926;
+                  }
+                };
+                break;
+            }
             return gain;
           case 'square':
             var oscillator = ac.createOscillator();
@@ -102,7 +134,7 @@
         if (e.repeat) return;
         var key = e.which;
         var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
-        var node = makeNode(doc.documentElement, ac.convolver);
+        var node = makeNode(doc.documentElement, ac.target);
         node.dispatchEvent(new Event('tin-start'));
         function onblur(e) {
           node.dispatchEvent(new Event('tin-stop'));
@@ -122,6 +154,7 @@
         var fr = new FileReader;
         fr.onload = function() {
           ac.decodeAudioData(this.result, function(buffer) {
+            ac.target = ac.convolver;
             ac.convolver.buffer = buffer;
             file.disabled = false;
           });
