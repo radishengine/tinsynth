@@ -84,9 +84,10 @@
                     b6 = white * 0.115926;
                   }
                 };
-                return node;
+                node.connect(gain);
+                return gain;
             }
-            return gain;
+            break;
           case 'square':
             var oscillator = ac.createOscillator();
             oscillator.type = 'square';
