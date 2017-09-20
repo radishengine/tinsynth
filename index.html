@@ -117,7 +117,7 @@
       };
       function loadfile() {
         var file = document.getElementById('file');
-        if (file.fileList.length === 0) return;
+        if (file.files.length === 0) return;
         file.disabled = true;
         var fr = new FileReader;
         fr.onload = function() {
@@ -126,7 +126,7 @@
             file.disabled = false;
           });
         };
-        fr.readAsArrayBuffer(file.fileList[0]);
+        fr.readAsArrayBuffer(file.files[0]);
       }
     </script>
   </head>
