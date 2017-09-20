@@ -11,8 +11,8 @@
     </script>
     <script>
       var ac = new AudioContext;
-      ac.convolved = ac.createConvolver();
-      ac.convolved.connect(ac.destination);
+      ac.convolver = ac.createConvolver();
+      ac.convolver.connect(ac.destination);
       function parseFreqHz(freq) {
         if (/khz$/i.test(freq)) return freq.slice(0, -3) * 1000;
         if (/hz$/i.test(freq)) return +freq.slice(0, -2);
@@ -102,7 +102,7 @@
         if (e.repeat) return;
         var key = e.which;
         var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
-        var node = makeNode(doc.documentElement, ac.destination);
+        var node = makeNode(doc.documentElement, ac.convolver);
         node.dispatchEvent(new Event('tin-start'));
         function onblur(e) {
           node.dispatchEvent(new Event('tin-stop'));
