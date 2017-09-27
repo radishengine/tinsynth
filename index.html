@@ -3,12 +3,13 @@
   <head>
     <script type='application/xml' id='data'>
       <envelope attack='50ms' decay='25ms' sustain='50%' release='100ms'>
-        <noise mode='pink'/>
         <!--
-        <square freq='440hz'>
-          <lfo on='detune' min='-50' max='50' freq='5hz' />
-        </square>
+        <noise mode='pink'/>
         -->
+        <sine freq='220hz'/>
+        <sine freq='440hz'/>
+        <sine freq='660hz'/>
+        <sine freq='880hz'/>
       </envelope>
     </script>
     <script>
@@ -94,8 +95,11 @@
             }
             break;
           case 'square':
+          case 'sine':
+          case 'sawtooth':
+          case 'triangle':
             var oscillator = ac.createOscillator();
-            oscillator.type = 'square';
+            oscillator.type = soundEl.nodeName;
             oscillator.frequency.value = parseFreqHz(soundEl.getAttribute('freq'));
             oscillator.connect(gain);
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
