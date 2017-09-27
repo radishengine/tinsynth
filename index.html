@@ -56,6 +56,7 @@
         switch (soundEl.nodeName) {
           case 'envelope':
             gain.gain.value = 0;
+            gain.gain.linearRampToValueAtTime(0, ac.currentTime);
             var attack = parseTimeSeconds(soundEl.getAttribute('attack') || '10ms');
             var decay = parseTimeSeconds(soundEl.getAttribute('decay') || '10ms');
             var sustain = parseVolumeGain(soundEl.getAttribute('sustain') || '100%');
