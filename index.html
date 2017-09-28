@@ -70,7 +70,8 @@
             }
             gain.nodes = [];
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
-              gain.nodes.push(makeNode(childEl, gain));
+              var node = makeNode(childEl, gain);
+              if (node) gain.nodes.push(node);
             }
             gain.addEventListener('tin-start', function delegate(e) {
               this.nodes.forEach(function(node) {
