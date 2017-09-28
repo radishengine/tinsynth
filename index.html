@@ -3,7 +3,7 @@
   <head>
     <svg id='data'>
       <metadata>
-        <envelope xmlns='tinsynth'>
+        <combo xmlns='tinsynth'>
           <envelope attack='50ms' decay='25ms' release='50ms'>
             <noise mode='pink'/>
           </envelope>
@@ -17,7 +17,7 @@
             <sine freq='660hz' volume='60%'/>
             <sine freq='880hz' volume='40%'/>
           </envelope>
-        </envelope>
+        </combo>
       </metadata>
     </svg>
     <script>
@@ -63,13 +63,7 @@
         gain.connect(destination);
         gain.gain.value = parseVolumeGain(soundEl.getAttribute('volume') || '100%');
         switch (soundEl.nodeName) {
-          case 'envelope':
-            gain.gain.value = 0;
-            gain.gain.linearRampToValueAtTime(0, ac.currentTime);
-            var attack = parseTimeSeconds(soundEl.getAttribute('attack') || '0ms');
-            gain.gain.linearRampToValueAtTime(1, ac.currentTime + attack);
-            var decay = parseTimeSeconds(soundEl.getAttribute('decay') || '0ms');
-            var release = parseTimeSeconds(soundEl.getAttribute('release') || '0ms');
+          case 'combo':
             gain.nodes = [];
             for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
               var node = makeNode(childEl, gain);
@@ -80,19 +74,37 @@
                 node.dispatchEvent(new Event(e.type));
               });
             });
-            if (soundEl.hasAttribute('sustain')) {
-              var sustain = parseVolumeGain(soundEl.getAttribute('sustain') || '100%');
-              if (sustain !== 1) {
-                gain.gain.linearRampToValueAtTime(sustain, ac.currentTime + attack + decay);
+            return gain;
+          case 'envelope':
+            gain.gain.value = 0;
+            gain.nodes = [];
+            for (var childEl = soundEl.firstElementChild; childEl; childEl = childEl.nextElementSibling) {
+              var node = makeNode(childEl, gain);
+              if (node) gain.nodes.push(node);
+            }
+            gain.addEventListener('tin-start', function delegate(e) {
+              var attack = parseTimeSeconds(soundEl.getAttribute('attack') || '0ms');
+              var decay = parseTimeSeconds(soundEl.getAttribute('decay') || '0ms');
+              var release = parseTimeSeconds(soundEl.getAttribute('release') || '0ms');
+              this.gain.linearRampToValueAtTime(0, ac.currentTime);
+              this.gain.linearRampToValueAtTime(1, ac.currentTime + attack);
+              if (soundEl.hasAttribute('sustain')) {
+                var sustain = parseVolumeGain(soundEl.getAttribute('sustain') || '100%');
+                if (sustain !== 1) {
+                  this.gain.linearRampToValueAtTime(sustain, ac.currentTime + attack + decay);
+                }
+                gain.addEventListener('tin-stop', function delegate(e) {
+                  this.gain.linearRampToValueAtTime(0, ac.currentTime + release);
+                });
               }
-              gain.addEventListener('tin-stop', function delegate(e) {
-                this.gain.linearRampToValueAtTime(0, ac.currentTime + release);
+              else {
+                this.gain.linearRampToValueAtTime(1, ac.currentTime + attack + decay);
+                this.gain.linearRampToValueAtTime(0, ac.currentTime + attack + decay + release);
+              }
+              this.nodes.forEach(function(node) {
+                node.dispatchEvent(new Event(e.type));
               });
-            }
-            else {
-              gain.gain.linearRampToValueAtTime(1, ac.currentTime + attack + decay);
-              gain.gain.linearRampToValueAtTime(0, ac.currentTime + attack + decay + release);
-            }
+            });
             return gain;
           case 'noise':
             var mode = soundEl.getAttribute('mode') || 'pink';
