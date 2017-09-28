@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script type='application/xml' id='data'>
-      <envelope attack='50ms' decay='25ms' sustain='50%' release='100ms'>
-        <!--
-        <noise mode='pink'/>
-        -->
-        <sine freq='220hz'/>
-        <sine freq='440hz' volume='80%'/>
-        <sine freq='660hz' volume='60%'/>
-        <sine freq='880hz' volume='40%'/>
-      </envelope>
-    </script>
+    <svg id='data'>
+      <metadata>
+        <envelope xmlns='tinsynth' attack='50ms' decay='25ms' sustain='50%' release='100ms'>
+          <!--
+          <noise mode='pink'/>
+          -->
+
+          <sine freq='220hz'/>
+          <sine freq='440hz' volume='80%'/>
+          <sine freq='660hz' volume='60%'/>
+          <sine freq='880hz' volume='40%'/>
+        </envelope>
+      </metadata>
+    </svg>
     <script>
       var ac = new AudioContext;
       ac.target = ac.destination;
@@ -143,8 +146,11 @@
       window.onkeydown = function onkeydown(e) {
         if (e.repeat) return;
         var key = e.which;
-        var doc = new DOMParser().parseFromString(document.getElementById('data').textContent, 'application/xml');
-        var node = makeNode(doc.documentElement, ac.target);
+        var def = document.querySelector('svg > metadata > *');
+        if (!def || def.namespaceURI !== 'tinsynth') {
+          throw new Error('tinsynth data not found');
+        }
+        var node = makeNode(def, ac.target);
         node.dispatchEvent(new Event('tin-start'));
         function onblur(e) {
           node.dispatchEvent(new Event('tin-stop'));
