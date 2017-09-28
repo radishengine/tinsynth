@@ -90,8 +90,8 @@
               });
             }
             else {
-              this.gain.linearRampToValueAtTime(1, ac.currentTime + attack + decay);
-              this.gain.linearRampToValueAtTime(0, ac.currentTime + attack + decay + release);
+              gain.gain.linearRampToValueAtTime(1, ac.currentTime + attack + decay);
+              gain.gain.linearRampToValueAtTime(0, ac.currentTime + attack + decay + release);
             }
             return gain;
           case 'noise':
