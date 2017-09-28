@@ -147,7 +147,7 @@
         if (e.repeat) return;
         var key = e.which;
         var def = document.querySelector('svg > metadata > *');
-        if (!def || def.namespaceURI !== 'tinsynth') {
+        if (!def || def.getAttribute('xmlns') !== 'tinsynth') {
           throw new Error('tinsynth data not found');
         }
         var node = makeNode(def, ac.target);
