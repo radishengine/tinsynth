@@ -5,7 +5,7 @@
       <metadata>
         <combo xmlns='tinsynth'>
           <envelope attack='50ms' decay='25ms' release='50ms'>
-            <noise mode='pink'/>
+            <white-noise/>
           </envelope>
           <envelope attack='75ms' sustain='100%' release='100ms'>
             <!--
@@ -23,7 +23,8 @@
     <script>
       var ac = new AudioContext;
       ac.target = ac.destination;
-      ac.pinkBuffer = (function() {
+      ac.buffers = {};
+      ac.buffers['pink-noise'] = (function() {
         var buffer = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
         var b0, b1, b2, b3, b4, b5, b6;
         b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0;
@@ -106,21 +107,14 @@
               });
             });
             return gain;
-          case 'noise':
-            var mode = soundEl.getAttribute('mode') || 'pink';
-            switch (mode) {
-              default:
-                console.warn('unknown noise mode: ' + mode);
-                break;
-              case 'pink':
-                var node = ac.createBufferSource();
-                node.buffer = ac.pinkBuffer;
-                node.loop = true;
-                node.start(0);
-                node.connect(gain);
-                return gain;
-            }
-            break;
+          //case 'white-noise':
+          case 'pink-noise':
+            var node = ac.createBufferSource();
+            node.buffer = ac.buffers[soundEl.nodeName];
+            node.loop = true;
+            node.start(0);
+            node.connect(gain);
+            return gain;
           case 'square':
           case 'sine':
           case 'sawtooth':
